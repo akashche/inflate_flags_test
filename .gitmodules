@@ -1,0 +1,6 @@
+[submodule "zlib_128"]
+	path = zlib_128
+	url = https://github.com/madler/zlib.git
+[submodule "zlib_123"]
+	path = zlib_123
+	url = https://github.com/madler/zlib.git
