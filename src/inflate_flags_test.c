@@ -24,7 +24,7 @@ static void exit_error(const char* error) {
 }
 
 static void read_compressed_data() {
-    FILE* fi = fopen("../resources/data/XSDHandler.class.zip", "r");
+    FILE* fi = fopen("../resources/data/XSDHandler.class.zip", "rb");
     if (!fi) exit_error("ERROR: data file open");
     int seek_res = fseek(fi, HEADER_LEN, SEEK_SET);
     if (0 != seek_res) exit_error("ERROR: data seek");
