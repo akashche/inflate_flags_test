@@ -53,6 +53,7 @@ static void do_inflate(z_stream* strm_ptr, int flush_mode,
         switch (ret) {
             case Z_STREAM_END:
                 if (UNCOMPRESSED_LEN != strm_ptr->total_out) exit_error("ERROR: stream end");
+                puts("INFO: inflate exited correctly");
                 return;
             case Z_OK:
             case Z_BUF_ERROR:
@@ -72,7 +73,6 @@ static void do_inflate(z_stream* strm_ptr, int flush_mode,
 }
 
 int main(int argc, char* argv[]) {
-    printf("%d\n", argc);
     // arguments
     if (argc != 2 && argc != 4) exit_error("ERROR: either one (flush_mode) or"
             " three (flush_mode, input_buf_len, output_buf_len) arguments must be specified");
