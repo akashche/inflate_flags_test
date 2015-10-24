@@ -13,4 +13,6 @@ target_link_libraries ( ${PROJECT_NAME} zlib_128 )
 target_include_directories ( ${PROJECT_NAME} BEFORE PRIVATE
         ${CMAKE_CURRENT_BINARY_DIR}/zlib_128
         ${CMAKE_CURRENT_LIST_DIR}/zlib_128 )
-target_compile_options ( ${PROJECT_NAME} PRIVATE -Wall -Werror -Wextra )
+
+#target_compile_options ( ${PROJECT_NAME} PRIVATE -Wall -Werror -Wextra -g -O0 )
+#target_compile_options ( zlib_128 PRIVATE -g -O0 )

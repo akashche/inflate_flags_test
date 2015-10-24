@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "zlib.h"
 
 #define COMPRESSED_LEN 39546 // 0x9a7a
@@ -41,26 +42,65 @@ static void write_uncompressed_data() {
     fclose(fi);
 }
 
-int main() {
+static void do_inflate(z_stream* strm_ptr, int flush_mode,
+        unsigned int input_buf_len, unsigned int output_buf_len) {
+    strm_ptr->next_in = (unsigned char*) &COMPRESSED;
+    strm_ptr->avail_in = input_buf_len;
+    strm_ptr->next_out = (unsigned char*) &UNCOMPRESSED;
+    strm_ptr->avail_out = output_buf_len;
+    for (;;) {
+        int ret = inflate(strm_ptr, flush_mode);
+        switch (ret) {
+            case Z_STREAM_END:
+                if (UNCOMPRESSED_LEN != strm_ptr->total_out) exit_error("ERROR: stream end");
+                return;
+            case Z_OK:
+            case Z_BUF_ERROR:
+                if (0 == strm_ptr->avail_in) {
+                    unsigned int left = COMPRESSED_LEN - strm_ptr->total_in;
+                    strm_ptr->avail_in = left >= input_buf_len ? input_buf_len : left;
+                }
+                if (0 == strm_ptr->avail_out) {
+                    unsigned int left = UNCOMPRESSED_LEN - strm_ptr->total_out;
+                    strm_ptr->avail_out = left >= output_buf_len ? output_buf_len : left;
+                }
+                break;
+            default:
+                exit_error("ERROR: inflate");
+        }
+    }
+}
+
+int main(int argc, char* argv[]) {
+    printf("%d\n", argc);
+    // arguments
+    if (argc != 2 && argc != 4) exit_error("ERROR: either one (flush_mode) or"
+            " three (flush_mode, input_buf_len, output_buf_len) arguments must be specified");
+    int flush_mode = atoi(argv[1]);
+    unsigned int input_buf_len = 4 == argc ? atoi(argv[2]) : COMPRESSED_LEN;
+    unsigned int output_buf_len = 4 == argc ? atoi(argv[3]) : UNCOMPRESSED_LEN;
+    printf("INFO: flush_mode: [%d], input_buf_len: [%u], output_buf_len: [%u]\n", 
+            flush_mode, input_buf_len, output_buf_len);
+            
+    // read data to memory
     read_compressed_data();
     
+    // init stream
     z_stream strm;
     memset(&strm, 0, sizeof(strm));
     int init_res = inflateInit2(&strm, -MAX_WBITS);
     if (Z_OK != init_res) exit_error("ERROR: inflate init");
-
-    strm.next_in = (unsigned char*) &COMPRESSED;
-    strm.avail_in = COMPRESSED_LEN;
-    strm.next_out = (unsigned char*) &UNCOMPRESSED;
-    strm.avail_out = UNCOMPRESSED_LEN;
     
-    int inflate_res = inflate(&strm, Z_FINISH);
-    if (Z_STREAM_END != inflate_res) exit_error("ERROR: inflate");
+    // inflate
+    do_inflate(&strm, flush_mode, input_buf_len, output_buf_len);
     
-    int end_res = inflateEnd(&strm);
-    if (Z_OK != end_res) exit_error("ERROR: inflate end");
+    // don't close stream (finalizer wasn't called)
+//    int end_res = inflateEnd(&strm);
+//    if (Z_OK != end_res) exit_error("ERROR: inflate end");
     
+    // write data to check correctness (disabled)
     (void) write_uncompressed_data;
+//    write_uncompressed_data();
     return 0;
 }
 
