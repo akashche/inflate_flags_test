@@ -1,10 +1,10 @@
 Utility for testing zlib's inflate
 ==================================
 
-This project contains a small utility `inflate_flags_test` that allows to test a behaviour
-of `inflate` function with different options and on different versions of a [zlib](https://github.com/madler/zlib)
-library. It will decompress the test ZIP entry using one or more `inflate` calls and will
-exit without calling `inflateEnd` to emulate a real-life situation when ZIP files are left opened.
+This project contains a small utility `inflate_flags_test` that allows to test behaviour
+of the `inflate` function with different options and on different versions of a [zlib](https://github.com/madler/zlib)
+library. It decompresses the test ZIP entry using one or more `inflate` calls and
+exits without calling `inflateEnd` to emulate a real-life situation when ZIP files are left opened.
 
 This project contains multiple versions of a zlib as git submodules pinned to the different zlib tags.
 
@@ -75,7 +75,7 @@ One memory leak from `inflateInit2_` call will always be present (will be of dif
        by 0x4015C4: main (in ...)
 
 The second leak from the `inflate` -> `updatewindow` call will be present is some cases 
-(previous leak will also show it as an "indirect one"):
+(previous leak will also show it as an "indirect" one):
 
     32,768 bytes in 1 blocks are indirectly lost in loss record 1 of 2
        at 0x4C28BED: malloc (vg_replace_malloc.c:263)
@@ -93,7 +93,7 @@ On Windows [Dr. Memory](http://www.drmemory.org/) tool can be used instead of a 
         -- ^
         inflate_flags_test_123.exe 1 8192 8192
 
-Dr. Memory won't show the second leak with detailed stack trace as a Valgrind, but still can show it
+Dr. Memory won't show the second leak with detailed stack trace as in Valgrind, but still can show it
 as an "indirect" part of the first leak:
 
     Error #7: LEAK 7116 direct bytes 0x015f9dd8-0x015fb9a4 + 32768 indirect bytes
